@@ -173,11 +173,13 @@ async function handleModuleEvent(event: MatrixEvent) {
                     if (forwardResult.response.message) {
                         const recipient = forwardResult.response.recipient;
                         const destination = recipient ? await getDirectRoom(recipient) : event.room_id;
+                        // a reply can only point at a message in the same room, so private replies are sent plain
+                        const replyTo = recipient ? undefined : forwardResult.response.replyTo;
                         sendMessage(destination, forwardResult.response.message, {
                             moduleEvent: true,
                             wrapperEvent: false,
                             ...forwardResult.response.context
-                        });
+                        }, replyTo);
                         return;
                     }
 
@@ -185,11 +187,12 @@ async function handleModuleEvent(event: MatrixEvent) {
                         forwardResult.response.forEach(async response => {
                             const recipient = response.recipient;
                             const destination = recipient ? await getDirectRoom(recipient) : event.room_id;
+                            const replyTo = recipient ? undefined : response.replyTo;
                             sendMessage(destination, response.message, {
                                 moduleEvent: true,
                                 wrapperEvent: false,
                                 ...response.context
-                            })
+                            }, replyTo)
                         })
                         return;
                     }

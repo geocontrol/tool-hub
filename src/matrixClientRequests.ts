@@ -57,13 +57,15 @@ export const sendEvent = (roomId: string, content: any, type: string) => {
   return response;
 };
 
-export const sendMessage = (roomId: string, message: string, context = {}) => {
+// replyTo: event id of a message in the same room to send this as a reply to (bridged as a quoted reply)
+export const sendMessage = (roomId: string, message: string, context = {}, replyTo?: string) => {
   return sendEvent(
     roomId,
     {
       body: message,
       msgtype: "m.text",
       context,
+      ...(replyTo ? { "m.relates_to": { "m.in_reply_to": { event_id: replyTo } } } : {}),
     },
     "m.room.message"
   );
